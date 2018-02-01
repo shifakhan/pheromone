@@ -73,6 +73,7 @@ class PublishableModel < ActiveRecord::Base
       event_types: [:create],
       topic: :topic_test,
       message: ->(obj) { { name: obj.name } },
+      metadata: { metadata: 'test' },
       dispatch_method: :async
     }
   ]
@@ -324,6 +325,57 @@ end
  ```
 
 As seen above `timestamp` will be added automatically to the main attributes along with the message metadata. The actual message will be encapsulated inside a key called `blob`.
+
+### 8. Specifiying metadata
+
+Metadata can be sent along with every message. When the value isn't specified, default values are used:
+
+```
+'metadata' => { 
+  'event' => 'create', 
+  'entity' => 'PublishableModel'
+}.to_json
+```
+
+The default values can be overriden by specifiying a value. 
+
+#### 8.a. Using a proc in `metadata`
+
+```
+class PublishableModel < ActiveRecord::Base
+  include Pheromone::Publishable
+  publish [
+    {
+      event_types: [:create],
+      topic: :topic1,
+      message: { message: 'test' } 
+      metadata: ->(obj) { { name: obj.name } }
+    }
+  ]
+end
+```
+
+#### 8.b. Using a defined function in `metadata`
+
+```
+class PublishableModel < ActiveRecord::Base
+  include Pheromone::Publishable
+  publish [
+    {
+      event_types: [:update],
+      topic: :topic1,
+      message: { message: 'test' } 
+      metadata: metadata
+    }
+  ]
+
+  def metadata
+    { metadata: 'test' }
+  end
+end
+```
+
+###
 
 ## Development
 
